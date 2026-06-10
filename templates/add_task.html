@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Task</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .container {
+            background: white;
+            width: 500px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        input, textarea, select {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Add Task</h1>
+
+    <form method="post" action="/add-task">
+        
+        <input 
+        type="hidden" 
+        name="user_id" 
+        value="{{ user_id }}"
+        >
+
+        <input
+            type="text"
+            name="title"
+            placeholder="Task title"
+        >
+
+        <textarea
+            name="description"
+            placeholder="Description"
+        ></textarea>
+
+        <select name="day">
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+            <option>Sunday</option>
+        </select>
+
+        <br><br>
+
+        <button type="submit">
+            Save Task
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

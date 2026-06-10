@@ -1,0 +1,37 @@
+<html>
+<body>
+
+<h1>Edit Task</h1>
+
+<form method="post" action="/edit-task/{{ title }}">
+
+    <input
+        type="text"
+        name="title"
+        value="{{ title }}"
+    >
+
+    <br><br>
+
+    <select name="day">
+
+        <option>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+        <option>Saturday</option>
+        <option>Sunday</option>
+
+    </select>
+
+    <br><br>
+
+    <button type="submit">
+        Save Changes
+    </button>
+
+</form>
+
+</body>
+</html>

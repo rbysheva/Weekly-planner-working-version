@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .container {
+            background: white;
+            width: 600px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .task-card {
+            background: #f4f6f9;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Weekly Planner</h1>
+
+        <h2>Your Tasks</h2>
+
+    {% if tasks %}
+
+    {% for task in tasks %}
+
+    <div class="task-card">
+        <strong>{{ task[0] }}</strong>
+        <br>
+        {{ task[1] }}
+
+        <form action="/edit-task/{{ task[0] }}" method="get">
+            <button type="submit">
+            Edit
+            </button>
+        </form>
+
+        <form action="/delete-task" method="post">
+            <input type="hidden" name="title" value="{{ task[0] }}">
+                <button type="submit">
+                Delete
+                </button>
+        </form>
+
+
+    </div>
+    {% endfor %}
+
+    {% else %}
+
+    <p>No tasks yet.</p>
+
+    {% endif %}
+
+        <a href="/add-task?user_id={{ user_id }}">
+            <button>Add Task</button>
+        </a>
+
+    </div>
+</body>
+</html>

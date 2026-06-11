@@ -4,7 +4,12 @@
 <h1>Edit Task</h1>
 
 <form method="post" action="/edit-task/{{ title }}">
-
+    <input 
+    type="hidden" 
+    name="user_id" 
+    value="{{ user_id }}"
+    >
+    
     <input
         type="text"
         name="title"

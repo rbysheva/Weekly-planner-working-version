@@ -76,7 +76,8 @@ def login_user(
         task_cursor = task_conn.cursor()
 
         task_cursor.execute(
-        "SELECT title, day FROM tasks"
+        "SELECT title, day FROM tasks WHERE user_id=?",
+        (user[0],)
         )
 
         tasks = task_cursor.fetchall()
@@ -90,9 +91,11 @@ def login_user(
                 "request": {},
                 "name": user[1],
                 "user_id": user[0],
-                "tasks": tasks
+                "tasks": tasks,
+                "xp": user[4],
+                "level": user[5]
             }
-    )
+        )
 
     return {
         "message": "Invalid email or password"
@@ -113,13 +116,25 @@ def add_task_page(
     )
 
 @app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
+def dashboard(
+    request: Request,
+    user_id: int
+):
 
     conn = sqlite3.connect("weekplanner.db")
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT title, day FROM tasks"
+    "SELECT name FROM users WHERE id=?",
+    (user_id,)
+    )
+
+    user = cursor.fetchone()
+    name = user[0]
+
+    cursor.execute(
+    "SELECT title, day, status FROM tasks WHERE user_id=?",
+    (user_id,)
     )
 
     tasks = cursor.fetchall()
@@ -131,21 +146,25 @@ def dashboard(request: Request):
         name="dashboard.html",
         context={
             "request": request,
-            "tasks": tasks
+            "tasks": tasks,
+            "user_id": user_id,
+            "name": name
         }
     )
 
 @app.get("/edit-task/{title}", response_class=HTMLResponse)
 def edit_task_page(
     request: Request,
-    title: str
+    title: str,
+    user_id: int
 ):
     return templates.TemplateResponse(
         request=request,
         name="edit_task.html",
         context={
             "request": request,
-            "title": title
+            "title": title,
+            "user_id": user_id
         }
     )
 
@@ -153,7 +172,8 @@ def edit_task_page(
 def update_task(
     old_title: str,
     title: str = Form(...),
-    day: str = Form(...)
+    day: str = Form(...),
+    user_id: int = Form(...)
 ):
 
     conn = sqlite3.connect("weekplanner.db")
@@ -172,8 +192,8 @@ def update_task(
     conn.close()
 
     return RedirectResponse(
-        url="/dashboard",
-        status_code=303
+    url=f"/dashboard?user_id={user_id}",
+    status_code=303
     )
 
 @app.post("/add-task")
@@ -188,22 +208,36 @@ def save_task(
 
     cursor.execute(
         """
-        INSERT INTO tasks (title, description, day, user_id)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO tasks (
+            title,
+            description,
+            day,
+            status,
+            user_id
+        )
+        VALUES (?, ?, ?, ?, ?)
         """,
-        (title, description, day, user_id)
+        (
+            title,
+            description,
+            day,
+            "Pending",
+            user_id
+        )
     )
 
     conn.commit()
     conn.close()
 
     return RedirectResponse(
-    url="/dashboard",
+    url=f"/dashboard?user_id={user_id}",
     status_code=303
     )
+
 @app.post("/delete-task")
 def delete_task(
-    title: str = Form(...)
+    title: str = Form(...),
+    user_id: int = Form(...)
 ):
     conn = sqlite3.connect("weekplanner.db")
     cursor = conn.cursor()
@@ -217,6 +251,32 @@ def delete_task(
     conn.close()
 
     return RedirectResponse(
-        url="/dashboard",
+    url=f"/dashboard?user_id={user_id}",
+    status_code=303
+    )
+
+@app.post("/complete-task")
+def complete_task(
+    title: str = Form(...),
+    user_id: int = Form(...)
+):
+
+    conn = sqlite3.connect("weekplanner.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE tasks
+        SET status='Completed'
+        WHERE title=? AND user_id=?
+        """,
+        (title, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse(
+        url=f"/dashboard?user_id={user_id}",
         status_code=303
     )

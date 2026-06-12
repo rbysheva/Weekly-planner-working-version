@@ -3,7 +3,8 @@ import sqlite3
 conn = sqlite3.connect("weekplanner.db")
 cursor = conn.cursor()
 
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-print(cursor.fetchall())
+cursor.execute("SELECT COUNT(*) FROM users")
+print(cursor.fetchone())
 
-conn.close()
+cursor.execute("SELECT * FROM users")
+print(cursor.fetchall())

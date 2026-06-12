@@ -5,41 +5,46 @@
 
     <style>
         body {
-            background: #111827;
-            color: #f3f4f6;
-            font-family: "Trebuchet MS", sans-serif;
+            background: linear-gradient(
+                135deg,
+                #fff7fb,
+                #f7f1ff,
+                #eef6ff
+            );
 
-            display: flex;
-            justify-content: center;
-            padding-top: 50px;
+            min-height:100vh;
+
+            font-family:'Segoe UI',sans-serif;
         }
 
-        .container {
-            width: 800px;
-            background: #1f2937;
-            border: 3px solid #7c3aed;
-            border-radius: 20px;
-            padding: 30px;
+        .container{
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(12px);
+            border:1px solid #e9d5ff;
+            border-radius:30px;
             box-shadow:
-                0 0 15px #7c3aed,
-                0 0 30px rgba(124,58,237,0.3);
+            0 15px 40px rgba(139,92,246,.12);
+            padding:30px;
+            background:white;
+            border-radius:30px;
+            box-shadow:
+            0 10px 30px rgba(0,0,0,.08);
+            max-width:1100px;
+            margin:40px auto;
         }
 
-        button {
-            background: #7c3aed;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 10px;
-            margin-top: 8px;
-            cursor: pointer;
-            transition: 0.3s;
+        button{
+            background:#d8b4fe;
+            color:white;
+            border:none;
+            border-radius:12px;
+            padding:10px 18px;
+            font-weight:bold;
         }
         
-        button:hover {
-            background: #9333ea;
-
-            box-shadow: 0 0 10px #9333ea;
+        button:hover{
+            transform:translateY(-2px);
+            background:#c084fc;
         }
 
         .buttons {
@@ -48,39 +53,143 @@
             margin-top: 12px;
         }
 
-        .task-card {
-            background: #374151;
-            border-left: 5px solid #a855f7;
-            border-radius: 12px;
-            padding: 18px;
-            margin: 15px auto;
-            max-width: 500px;
-            text-align: left;
+        .task-card{
+             background:white;
+            border-radius:20px;
+            padding:20px;
+            box-shadow:0 8px 25px rgba(200,150,255,.15);
+            transition:.3s;
         }
 
         .task-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 15px #9333ea;
+            transform:translateY(-4px);
         }
 
-        h1 {
-            text-align: center;
-            color: #c084fc;
-            font-size: 42px;
-            text-shadow: 0 0 10px #7c3aed;
+        h1{
+            color:#120f1a;
+            text-shadow:
+            0 0 10px rgba(192,132,252,.25);
         }
 
         h2 {
             text-align: center;
         }
 
-        .trainer-card {
-            background: #111827;
-            border: 2px solid #7c3aed;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 25px;
+        .trainer-card{
+            background:#fff9fd;
+            border: 1px solid #eadcff;
+            border-radius: 20px;
+            padding: 25px;
             text-align: center;
+            margin-bottom: 30px;
+            margin: 8px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            width: 280px;
+            min-height: 260px;
+        }
+
+        .xp-bar{
+            width:100%;
+            height:14px;
+            background:#f0e4ff;
+
+            border-radius:20px;
+            overflow:hidden;
+        }
+
+        .xp-fill{
+            width:35%;
+            height:100%;
+
+            background:linear-gradient(
+                90deg,
+                #f9a8d4,
+                #c084fc
+            );
+        }
+
+        .calendar-card{
+           background:#f8f3ff;
+            border-radius:25px;
+            padding:25px;
+            margin-top:25px;
+            box-shadow: 0 10px 30px rgba(200, 170, 255, 0.15);
+            flex:1.5;
+            text-align:center;
+            width: 500px;
+        }
+
+        .calendar-card h3{
+            text-align:center;
+            color:#7b5cff;
+            margin-bottom:15px;
+        }
+
+        .calendar-table{
+            width:100%;
+            border-collapse:collapse;
+            table-layout:fixed;
+        }
+
+        .calendar-table th{
+            color:#7b5cff;
+            padding:10px;
+        }
+
+        .calendar-table td{
+            width:40px;
+            height:40px;
+            text-align:center;
+            vertical-align:middle;
+            border-radius:50%;
+            transition:0.2s;
+            font-size:18px;
+            font-weight:500;
+            cursor:pointer;
+        }
+
+        .calendar-table td:hover{
+            background:#ffdfef;
+            transform:scale(1.05);
+            border-radius:50%;
+        }
+
+        .top-section{
+            display:flex;
+            gap:30px;
+            margin-bottom:30px;
+        }
+        .trainer-card,
+        .calendar-card,
+        .task-card{
+            background:white;
+            border-radius:30px;
+
+            box-shadow:
+                0 10px 30px rgba(201,132,252,0.15);
+
+            padding:30px;
+        }
+
+        .calendar-table th:nth-child(6),
+        .calendar-table td:nth-child(6){
+            color:#7aa7ff;
+        }
+
+        .calendar-table th:nth-child(7),
+        .calendar-table td:nth-child(7){
+            color:#ff7eb6;
+        }
+        
+        .today{
+            background:hsl(250, 100%, 91%) !important;
+            color:white !important;
+            font-weight:bold;
+            border-radius:50%;
         }
     </style>
 </head>
@@ -88,17 +197,58 @@
 <body>
     <div class="container">
 
-        <h1>🌙 Weekly Planner</h1>
+        <h1>🌸 Weekly Planner</h1>
+
+    <div class="top-section">
 
         <div class="trainer-card">
-            <h3>🎮 Trainer</h3>
+
+            <h2>🎮 Trainer</h2>
             <p>{{ name }}</p>
-            <br><br>
-            Level {{ level }}
-            <br>
-            XP: {{ xp }}/100
+            <p>🏅 {{ rank }}</p>
+            <p>⭐ Level {{ level }}</p>
+            <p>⚡ XP {{ xp }}/100</p>
+            <div class="xp-bar">
+            <div class="xp-fill"></div>
+            </div>
         </div>
 
+        <div class="calendar-card">
+            <h3>{{ month_name }} {{ year }}</h3>
+
+            <table class="calendar-table">
+                <tr>
+                    <th>Mo</th>
+                    <th>Tu</th>
+                    <th>We</th>
+                    <th>Th</th>
+                    <th>Fr</th>
+                    <th>Sa</th>
+                    <th>Su</th>
+                </tr>
+
+                {% for week in calendar %}
+                <tr>
+                    {% for day in week %}
+                        {% if day == 0 %}
+                            <td></td>
+
+                        {% elif day == current_day %}
+                            <td class="today">{{ day }}</td>
+
+                        {% else %}
+                            <td>{{ day }}</td>
+
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            
+        </div>
+        <p>Today: {{ current_day }}</p>
+
+    </div>
         <h2>Your Tasks</h2>
 
     {% if tasks %}

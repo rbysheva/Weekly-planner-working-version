@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 from fastapi import Form
 from fastapi.responses import RedirectResponse
+import calendar
+from datetime import datetime
 
 app = FastAPI()
 
@@ -84,22 +86,35 @@ def login_user(
 
         task_conn.close()
 
+        current_date = datetime.now()
+
+        month_name = current_date.strftime("%B")
+        year = current_date.year
+        current_day = current_date.day
+
+        cal = calendar.monthcalendar(year, current_date.month)
+
         return templates.TemplateResponse(
              request=request,
             name="dashboard.html",
             context={
-                "request": {},
+                "request": request,
                 "name": user[1],
                 "user_id": user[0],
                 "tasks": tasks,
                 "xp": user[4],
-                "level": user[5]
+                "level": user[5],
+                "calendar": cal,
+                "month_name": month_name,
+                "year": year,
+                "current_day": current_day
             }
         )
 
-    return {
-        "message": "Invalid email or password"
-    }
+    return RedirectResponse(
+            url=f"/dashboard?user_id={user[0]}",
+            status_code=303
+        )
 
 @app.get("/add-task", response_class=HTMLResponse)
 def add_task_page(
@@ -117,20 +132,48 @@ def add_task_page(
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(
+    
     request: Request,
     user_id: int
 ):
-
+    
     conn = sqlite3.connect("weekplanner.db")
     cursor = conn.cursor()
 
     cursor.execute(
-    "SELECT name FROM users WHERE id=?",
-    (user_id,)
-    )
+        "SELECT name, xp, level FROM users WHERE id=?",
+        (user_id,)
+    )  
+    user = cursor.fetchone()    
 
-    user = cursor.fetchone()
     name = user[0]
+    xp = user[1]
+    level = user[2]
+
+    current_date = datetime.now()
+
+    month_name = current_date.strftime("%B")
+    year = current_date.year
+    current_day = current_date.day
+
+    cal = calendar.monthcalendar(year, current_date.month)
+
+    if level >= 50:
+        rank = "Pokemon Champion"
+    elif level >= 40:
+        rank = "Elite Four Member"
+    elif level >= 30:
+        rank = "Gym Leader"
+    elif level >= 20:
+        rank = "Gym Challenger"
+    elif level >= 15:
+        rank = "Expert Trainer"
+    elif level >= 10:
+        rank = "Ace Trainer"
+    elif level >= 5:
+        rank = "Rising Trainer"
+    else:
+        rank = "Pokemon Trainer"
 
     cursor.execute(
     "SELECT title, day, status FROM tasks WHERE user_id=?",
@@ -141,6 +184,9 @@ def dashboard(
 
     conn.close()
 
+    print("USER:", user)
+    print("TASKS:", tasks)
+    
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
@@ -148,7 +194,14 @@ def dashboard(
             "request": request,
             "tasks": tasks,
             "user_id": user_id,
-            "name": name
+            "name": name,
+            "xp": xp,
+            "level": level,
+            "rank": rank,
+            "calendar": cal,
+            "month_name": month_name,
+            "year": year,
+            "current_day": current_day
         }
     )
 
@@ -273,6 +326,48 @@ def complete_task(
         (title, user_id)
     )
 
+    cursor.execute(
+    """
+    UPDATE users
+    SET xp = xp + 10
+    WHERE id = ?
+    """,
+    (user_id,)
+    )
+    cursor.execute(
+    """
+    SELECT xp, level
+    FROM users
+    WHERE id = ?
+    """,
+    (user_id,)
+    )
+
+    cursor.execute(
+    """
+    SELECT xp, level
+    FROM users
+    WHERE id = ?
+    """,
+    (user_id,)
+    )
+
+    user = cursor.fetchone()
+
+    xp = user[0]
+    level = user[1]
+
+
+    if xp >= 100:
+        cursor.execute("""
+        UPDATE users
+        SET level = level + 1,
+            xp = 0
+        WHERE id = ?
+        """,
+        (user_id,)
+    )
+
     conn.commit()
     conn.close()
 
@@ -280,3 +375,5 @@ def complete_task(
         url=f"/dashboard?user_id={user_id}",
         status_code=303
     )
+
+

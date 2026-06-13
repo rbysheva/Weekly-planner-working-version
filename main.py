@@ -7,8 +7,11 @@ from fastapi import Form
 from fastapi.responses import RedirectResponse
 import calendar
 from datetime import datetime
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 

@@ -1,88 +1,206 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Task</title>
-
+    <title>Add Task — Poké Planner</title>
+    <meta charset="UTF-8">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --green:    #7a9e4e;
+            --green-lt: #a8c27a;
+            --green-bg: #f0f4e8;
+            --cream:    #faf8f2;
+            --cream2:   #f5f1e6;
+            --brown:    #5b4535;
+            --brown-lt: #8b7a63;
+            --sand:     #e8e0cc;
+            --white:    #ffffff;
+            --shadow:   0 4px 18px rgba(0,0,0,.07);
+            --radius:   18px;
+            --radius-sm:12px;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            text-align: center;
-            padding-top: 80px;
+            background: var(--cream);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
 
-        .container {
-            background: white;
-            width: 500px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 36px 40px;
+            width: 100%;
+            max-width: 500px;
         }
 
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .card-header .icon { font-size: 28px; }
+        .card-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--brown);
+        }
+        .card-header p {
+            font-size: 13px;
+            color: var(--brown-lt);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--brown);
+            margin-bottom: 6px;
+        }
         input, textarea, select {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--sand);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: var(--brown);
+            background: var(--cream);
+            font-family: inherit;
+            transition: border-color .15s;
+            outline: none;
         }
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--green-lt);
+            background: var(--white);
+        }
+        textarea { resize: vertical; min-height: 90px; }
 
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+        /* Priority selector */
+        .priority-group { display: flex; gap: 10px; }
+        .priority-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--sand);
+            border-radius: var(--radius-sm);
+            background: var(--cream);
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
+            text-align: center;
+            transition: all .15s;
+            color: var(--brown-lt);
         }
+        .priority-btn:hover { border-color: var(--green-lt); color: var(--brown); }
+        .priority-btn.selected-high   { border-color: #e05b5b; background: #fdeaea; color: #c0392b; }
+        .priority-btn.selected-medium { border-color: #e09a30; background: #fef3e0; color: #c07820; }
+        .priority-btn.selected-low    { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn-save {
+            flex: 1;
+            padding: 13px;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, transform .15s;
+        }
+        .btn-save:hover { background: #6a8e3e; transform: translateY(-1px); }
+        .btn-back {
+            padding: 13px 20px;
+            background: var(--cream2);
+            color: var(--brown-lt);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: background .15s;
+        }
+        .btn-back:hover { background: var(--sand); }
     </style>
 </head>
-
 <body>
-
-<div class="container">
-
-    <h1>Add Task</h1>
+<div class="card">
+    <div class="card-header">
+        <div class="icon">⚡</div>
+        <div>
+            <h1>New Quest</h1>
+            <p>Add a task to your week plan</p>
+        </div>
+    </div>
 
     <form method="post" action="/add-task">
-        
-        <input 
-        type="hidden" 
-        name="user_id" 
-        value="{{ user_id }}"
-        >
+        <input type="hidden" name="user_id" value="{{ user_id }}">
+        <input type="hidden" name="priority" id="priority-input" value="Medium">
 
-        <input
-            type="text"
-            name="title"
-            placeholder="Task title"
-        >
+        <div class="form-group">
+            <label>Task title</label>
+            <input type="text" name="title" placeholder="E.g. Study for exam" required>
+        </div>
 
-        <textarea
-            name="description"
-            placeholder="Description"
-        ></textarea>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" placeholder="What do you need to do?"></textarea>
+        </div>
 
-        <select name="day">
-            <option>Monday</option>
-            <option>Tuesday</option>
-            <option>Wednesday</option>
-            <option>Thursday</option>
-            <option>Friday</option>
-            <option>Saturday</option>
-            <option>Sunday</option>
-        </select>
+        <div class="form-group">
+            <label>Day of the week</label>
+            <select name="day">
+                <option>Monday</option>
+                <option>Tuesday</option>
+                <option>Wednesday</option>
+                <option>Thursday</option>
+                <option>Friday</option>
+                <option>Saturday</option>
+                <option>Sunday</option>
+            </select>
+        </div>
 
-        <br><br>
+        <div class="form-group">
+            <label>Priority</label>
+            <div class="priority-group">
+                <div class="priority-btn" onclick="setPriority('High', this)">🔴 High</div>
+                <div class="priority-btn selected-medium" onclick="setPriority('Medium', this)">🟡 Medium</div>
+                <div class="priority-btn" onclick="setPriority('Low', this)">🟢 Low</div>
+            </div>
+        </div>
 
-        <button type="submit">
-            Save Task
-        </button>
-
+        <div class="actions">
+            <a href="/dashboard?user_id={{ user_id }}" class="btn-back">← Back</a>
+            <button type="submit" class="btn-save">Save Quest ⚡</button>
+        </div>
     </form>
-
 </div>
 
+<script>
+function setPriority(val, el) {
+    document.getElementById('priority-input').value = val;
+    document.querySelectorAll('.priority-btn').forEach(b => {
+        b.className = 'priority-btn';
+    });
+    el.classList.add('selected-' + val.toLowerCase());
+}
+</script>
 </body>
 </html>

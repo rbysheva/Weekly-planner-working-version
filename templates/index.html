@@ -1,60 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Week Planner</title>
-
+    <title>Poké Planner</title>
+    <meta charset="UTF-8">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --green:#7a9e4e; --green-lt:#a8c27a; --green-bg:#f0f4e8;
+            --cream:#faf8f2; --cream2:#f5f1e6; --brown:#5b4535;
+            --brown-lt:#8b7a63; --sand:#e8e0cc; --white:#ffffff;
+            --shadow:0 8px 28px rgba(0,0,0,.10); --radius:24px; --radius-sm:14px;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            text-align: center;
-            padding-top: 100px;
+            min-height:100vh; font-family:'Segoe UI',system-ui,sans-serif; color:var(--brown);
+            background:
+                radial-gradient(circle at 15% 20%, rgba(168,194,122,.18), transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(232,196,104,.15), transparent 40%),
+                var(--cream);
+            display:flex; align-items:center; justify-content:center; padding:24px;
         }
+        .hero {
+            background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow);
+            max-width:480px; width:100%; padding:48px 44px; text-align:center; position:relative;
+            overflow:hidden;
+        }
+        .hero::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:6px;
+            background:linear-gradient(90deg, var(--green-lt), var(--green), #e8c468);
+        }
+        .logo-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:8px; }
+        .logo-row img { width:54px; height:54px; }
+        .brand { font-size:30px; font-weight:800; color:var(--brown); letter-spacing:-.5px; }
+        .tagline { font-size:13px; color:var(--green); font-weight:600; letter-spacing:1px; margin-bottom:28px; }
 
-        .container {
-            background: white;
-            width: 500px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
+        .hero-poke { width:150px; margin:8px 0 24px; }
 
-        h1 {
-            color: #2c3e50;
-        }
+        .welcome-title { font-size:22px; font-weight:700; color:var(--brown); margin-bottom:10px; }
+        .welcome-text { font-size:14px; color:var(--brown-lt); line-height:1.6; margin-bottom:32px; }
 
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
+        .btn-row { display:flex; gap:14px; }
+        .btn {
+            flex:1; padding:14px; border-radius:var(--radius-sm); font-size:15px; font-weight:700;
+            cursor:pointer; text-decoration:none; transition:transform .15s, background .15s, box-shadow .15s;
+            display:flex; align-items:center; justify-content:center; gap:8px; border:none;
         }
+        .btn-primary { background:var(--green); color:#fff; box-shadow:0 4px 14px rgba(122,158,78,.35); }
+        .btn-primary:hover { background:#6a8e3e; transform:translateY(-2px); }
+        .btn-secondary { background:var(--cream2); color:var(--brown); }
+        .btn-secondary:hover { background:var(--sand); transform:translateY(-2px); }
 
-        button:hover {
-            background: #2980b9;
-        }
+        .features { display:flex; justify-content:center; gap:22px; margin-top:32px; padding-top:24px; border-top:1px solid var(--cream2); }
+        .feature { font-size:11px; color:var(--brown-lt); display:flex; flex-direction:column; align-items:center; gap:5px; }
+        .feature .f-icon { font-size:20px; }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>📅 Week Planner</h1>
+    <div class="hero">
+        <div class="logo-row">
+            <img src="/static/icons/ball.png" alt="">
+            <span class="brand">Poké Planner</span>
+        </div>
+        <div class="tagline">🌿 TRAINER HUB</div>
 
-        <h2>Welcome!</h2>
+        <img src="/static/icons/Halloween-Bulbasaur-Transparent-Background.png" class="hero-poke" alt="">
 
-        <p> Plan your week and track your progress.</p>
+        <div class="welcome-title">Welcome, Trainer! 👋</div>
+        <div class="welcome-text">
+            Plan your week, complete quests, build habits<br>
+            and level up — one task at a time.
+        </div>
 
-        <a href="/register">
-        <button>Sign Up</button>
-        </a>
-        <a href="/login">
-        <button>Login</button>
-        </a>
+        <div class="btn-row">
+            <a href="/register" class="btn btn-primary">⚡ Sign Up</a>
+            <a href="/login" class="btn btn-secondary">Login</a>
+        </div>
+
+        <div class="features">
+            <div class="feature"><span class="f-icon">📋</span> Tasks</div>
+            <div class="feature"><span class="f-icon">🌿</span> Habits</div>
+            <div class="feature"><span class="f-icon">📊</span> Progress</div>
+            <div class="feature"><span class="f-icon">🏆</span> Levels</div>
+        </div>
     </div>
 </body>
 </html>

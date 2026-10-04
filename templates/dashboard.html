@@ -1,714 +1,838 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-
+    <title>Poké Planner — Dashboard</title>
+    <meta charset="UTF-8">
     <style>
-        body {
-            display:flex;
-            background:#f5f3ee;
-            min-height:100vh;
-            font-family:'Segoe UI',sans-serif;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --green:     #7a9e4e;
+            --green-lt:  #a8c27a;
+            --green-bg:  #f0f4e8;
+            --cream:     #faf8f2;
+            --cream2:    #f5f1e6;
+            --brown:     #5b4535;
+            --brown-lt:  #8b7a63;
+            --sand:      #e8e0cc;
+            --white:     #ffffff;
+            --shadow:    0 4px 18px rgba(0,0,0,.07);
+            --shadow-lg: 0 10px 32px rgba(0,0,0,.10);
+            --radius:    18px;
+            --radius-sm: 12px;
+        }
+        body { display:flex; background:var(--cream); min-height:100vh; font-family:'Segoe UI',system-ui,sans-serif; color:var(--brown); }
+
+        /* SIDEBAR */
+        .sidebar { width:220px; min-height:100vh; background:var(--white); padding:28px 16px; display:flex; flex-direction:column; box-shadow:2px 0 12px rgba(0,0,0,.05); flex-shrink:0; }
+        .sidebar-logo { display:flex; align-items:center; gap:10px; margin-bottom:32px; padding-left:4px; }
+        .sidebar-logo img { width:36px; height:36px; }
+        .sidebar-logo span { font-size:17px; font-weight:700; color:var(--brown); }
+        .sidebar-logo small { display:block; font-size:10px; color:var(--green); font-weight:600; letter-spacing:.5px; }
+        .sidebar nav { display:flex; flex-direction:column; gap:4px; }
+        .sidebar nav a { display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:var(--radius-sm); text-decoration:none; color:var(--brown-lt); font-size:14px; font-weight:500; transition:background .15s,color .15s; }
+        .sidebar nav a:hover { background:var(--cream2); color:var(--brown); }
+        .sidebar nav a.active { background:var(--green); color:#fff; }
+        .sidebar nav a img { width:18px; height:18px; opacity:.75; }
+        .sidebar nav a.active img { opacity:1; filter:brightness(10); }
+        .sidebar-bottom { margin-top:auto; text-align:center; }
+        .sidebar-bottom .motivation { background:var(--cream2); border-radius:var(--radius); padding:14px 10px 0; font-size:12px; color:var(--brown-lt); font-weight:600; }
+        .sidebar-bottom .motivation span { display:block; margin-bottom:6px; }
+        .sidebar-bottom img { width:210px; }
+
+        /* MAIN */
+        .main { flex:1; padding:28px 28px 40px; min-width:0; }
+        .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
+        .header h1 { font-size:24px; font-weight:700; color:var(--brown); }
+        .header-sub { font-size:13px; color:var(--brown-lt); margin-top:3px; }
+
+        /* TOP ROW */
+        .top-row { display:grid; grid-template-columns:240px 1fr 200px; gap:18px; margin-bottom:18px; align-items:start; }
+
+        /* Trainer */
+        .trainer-card { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+        .trainer-top { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+        .avatar-wrap { width:56px; height:56px; border-radius:50%; background:var(--cream2); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+        .avatar-wrap img { width:48px; height:48px; object-fit:contain; }
+        .trainer-name { font-size:15px; font-weight:700; color:var(--brown); }
+        .trainer-badge { display:inline-flex; align-items:center; gap:5px; background:var(--green-bg); color:var(--green); font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px; margin-top:3px; }
+        .trainer-badge img { width:13px; }
+        .trainer-stats { display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--brown-lt); }
+        .trainer-stats span { display:flex; align-items:center; gap:6px; }
+        .trainer-stats img { width:14px; }
+        .xp-bar-wrap { margin-top:10px; }
+        .xp-label { display:flex; justify-content:space-between; font-size:11px; color:var(--brown-lt); margin-bottom:5px; }
+        .xp-track { height:8px; background:var(--sand); border-radius:999px; overflow:hidden; }
+        .xp-fill { height:100%; background:linear-gradient(90deg,var(--green-lt),var(--green)); border-radius:999px; }
+
+        /* Stats */
+        .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+        .stat-tile { background:var(--white); border-radius:var(--radius); padding:18px 14px; box-shadow:var(--shadow); text-align:center; }
+        .stat-tile .icon { font-size:22px; margin-bottom:6px; }
+        .stat-tile .val { font-size:22px; font-weight:700; color:var(--brown); }
+        .stat-tile .lbl { font-size:11px; color:var(--brown-lt); margin-top:2px; }
+
+        /* Calendar */
+        .cal-card { background:var(--white); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+        .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .cal-title { font-size:14px; font-weight:700; color:var(--brown); }
+        .cal-today-badge { font-size:11px; background:var(--green-bg); color:var(--green); padding:2px 8px; border-radius:999px; font-weight:600; }
+        table.cal-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+        .cal-table th { font-size:11px; color:var(--brown-lt); padding:4px 0; text-align:center; font-weight:600; }
+        .cal-table td { text-align:center; padding:5px 0; font-size:12px; cursor:pointer; transition:background .15s; color:var(--brown); }
+        .cal-table td:hover { background:var(--cream2); border-radius:50%; }
+        .cal-table td.today { background:var(--green); color:#fff; font-weight:700; border-radius:50%; }
+        .cal-table th:nth-child(6),.cal-table td:nth-child(6) { color:#a0c060; }
+        .cal-table th:nth-child(7),.cal-table td:nth-child(7) { color:#e0809a; }
+
+        /* Banner */
+        .today-banner { background:linear-gradient(135deg,#f5f0e0,#ebe3c8); border-radius:var(--radius); padding:26px 32px; margin-bottom:22px; display:flex; align-items:center; gap:28px; border-left:5px solid var(--green); box-shadow:var(--shadow); position:relative; overflow:hidden; }
+        .today-banner::after { content:'🌿'; position:absolute; right:24px; top:14px; font-size:28px; opacity:.35; }
+        .banner-text h2 { font-size:20px; font-weight:700; color:var(--brown); margin-bottom:6px; }
+        .banner-text p { font-size:13px; color:var(--brown-lt); line-height:1.6; }
+        .banner-btn { margin-left:auto; background:var(--green); color:#fff; border:none; padding:11px 22px; border-radius:var(--radius-sm); font-weight:600; font-size:13px; cursor:pointer; transition:background .15s,transform .15s; white-space:nowrap; flex-shrink:0; }
+        .banner-btn:hover { background:#6a8e3e; transform:translateY(-1px); }
+
+        /* Tasks */
+        .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+        .section-header h2 { font-size:16px; font-weight:700; }
+        .filter-bar { display:flex; gap:6px; flex-wrap:wrap; }
+        .filter-tab { padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; border:none; background:var(--cream2); color:var(--brown-lt); transition:background .15s,color .15s; }
+        .filter-tab.active { background:var(--green); color:#fff; }
+        .filter-tab:hover:not(.active) { background:var(--sand); }
+        .filter-tab.prio-high.active { background:#e05b5b; }
+        .filter-tab.prio-medium.active { background:#d4920a; }
+        .add-btn { display:flex; align-items:center; gap:6px; background:var(--green); color:#fff; border:none; padding:8px 16px; border-radius:var(--radius-sm); font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:background .15s; }
+        .add-btn:hover { background:#6a8e3e; }
+
+        .tasks-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+        .task-card { background:var(--white); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); border-left:4px solid var(--green-lt); display:flex; flex-direction:column; gap:10px; position:relative; transition:transform .2s,box-shadow .2s; }
+        .task-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+        .task-card.completed { border-left-color:#a8d5a2; opacity:.8; }
+        .task-card[data-priority="High"]   { border-left-color:#e05b5b; }
+        .task-card[data-priority="Medium"] { border-left-color:#e09a30; }
+        .task-card[data-priority="Low"]    { border-left-color:var(--green-lt); }
+        .task-poke { position:absolute; top:14px; right:14px; width:46px; height:46px; object-fit:contain; }
+        .task-title { font-size:14px; font-weight:700; color:var(--brown); padding-right:54px; line-height:1.4; }
+        .task-meta { font-size:12px; color:var(--brown-lt); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .priority-badge { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; }
+        .priority-badge.high   { background:#fdeaea; color:#c0392b; }
+        .priority-badge.medium { background:#fef3e0; color:#c07820; }
+        .priority-badge.low    { background:var(--green-bg); color:var(--green); }
+        .status-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; }
+        .status-badge.completed { background:#dff4e1; color:#2f7d4a; }
+        .status-badge.pending   { background:#fff1d6; color:#c68a15; }
+        .task-actions { display:flex; gap:7px; flex-wrap:wrap; }
+        .task-actions form { margin:0; }
+        .btn-sm { padding:6px 12px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; border:none; transition:background .15s,transform .15s; }
+        .btn-edit     { background:var(--cream2); color:var(--brown); }
+        .btn-delete   { background:#fde8e8; color:#c0392b; }
+        .btn-complete { background:var(--green-bg); color:var(--green); }
+        .btn-sm:hover { transform:translateY(-1px); filter:brightness(.95); }
+        .empty-state { grid-column:1/-1; text-align:center; padding:48px 20px; color:var(--brown-lt); }
+        .empty-state .empty-icon { font-size:40px; margin-bottom:12px; }
+        .task-card[data-hidden="true"] { display:none; }
+
+        /* ── SCHEDULE ── */
+        .schedule-section { margin-top:32px; }
+        .schedule-card {
+            background:var(--white); border-radius:var(--radius); padding:24px 28px; box-shadow:var(--shadow);
+        }
+        .schedule-list { display:flex; flex-direction:column; }
+        .schedule-item {
+            display:flex; align-items:center; gap:16px; padding:14px 0;
+            border-bottom:1px solid var(--cream2); position:relative;
+        }
+        .schedule-item:last-of-type { border-bottom:none; }
+        .sched-time {
+            font-size:14px; font-weight:700; color:var(--brown); min-width:54px; text-align:right;
+        }
+        .sched-divider { width:3px; align-self:stretch; background:var(--green-lt); border-radius:999px; }
+        .sched-body { flex:1; min-width:0; }
+        .sched-title { font-size:14px; font-weight:600; color:var(--brown); }
+        .sched-range { font-size:12px; color:var(--brown-lt); margin-top:2px; }
+        .sched-emoji {
+            width:42px; height:42px; border-radius:12px; background:var(--green-bg);
+            display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+        }
+        .sched-del {
+            background:none; border:none; cursor:pointer; color:#ccc; font-size:14px;
+            padding:6px 8px; border-radius:6px; transition:color .15s, background .15s;
+        }
+        .sched-del:hover { color:#e05b5b; background:#fdeaea; }
+        .schedule-empty { text-align:center; padding:30px 0; color:var(--brown-lt); font-size:14px; }
+
+        .add-sched-form {
+            display:flex; gap:10px; align-items:center; margin-top:18px; padding-top:18px;
+            border-top:1px solid var(--cream2); flex-wrap:wrap;
+        }
+        .add-sched-form select, .add-sched-form input {
+            padding:9px 12px; border:1.5px solid var(--sand); border-radius:var(--radius-sm);
+            font-size:13px; color:var(--brown); background:var(--cream); font-family:inherit; outline:none;
+        }
+        .add-sched-form input:focus, .add-sched-form select:focus { border-color:var(--green-lt); background:var(--white); }
+        .add-sched-form input[name="title"] { flex:1; min-width:140px; }
+        .add-sched-form input[type="time"] { width:120px; }
+        .add-sched-form select { font-size:16px; cursor:pointer; }
+
+        /* ── GOALS ── */
+        .goals-section { margin-top:32px; }
+        .goals-grid {
+            display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;
+        }
+        .goal-card {
+            background:var(--white); border-radius:var(--radius); padding:20px;
+            box-shadow:var(--shadow); position:relative; transition:transform .2s, box-shadow .2s;
+        }
+        .goal-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+        .goal-card.done { border:2px solid var(--green-lt); }
+        .goal-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+        .goal-emoji {
+            width:42px; height:42px; border-radius:12px; background:var(--green-bg);
+            display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+        }
+        .goal-info { flex:1; min-width:0; }
+        .goal-title { font-size:14px; font-weight:700; color:var(--brown); }
+        .goal-count { font-size:12px; color:var(--brown-lt); margin-top:2px; }
+        .goal-pct { font-size:16px; font-weight:800; color:var(--green); }
+        .goal-bar-track { height:10px; background:var(--sand); border-radius:999px; overflow:hidden; margin-bottom:14px; }
+        .goal-bar-fill { height:100%; background:linear-gradient(90deg,var(--green-lt),var(--green)); border-radius:999px; transition:width .5s ease; }
+        .goal-bar-fill.done { background:linear-gradient(90deg,#e8c468,#d4920a); }
+        .goal-actions { display:flex; gap:7px; align-items:center; }
+        .goal-btn {
+            width:32px; height:32px; border-radius:9px; border:none; cursor:pointer;
+            font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center;
+            transition:transform .15s, filter .15s;
+        }
+        .goal-btn:hover { transform:translateY(-1px); filter:brightness(.96); }
+        .goal-minus { background:var(--cream2); color:var(--brown-lt); }
+        .goal-plus  { background:var(--green-bg); color:var(--green); }
+        .goal-del   { background:#fde8e8; color:#c0392b; margin-left:auto; }
+        .goal-done-badge {
+            display:inline-flex; align-items:center; gap:4px; background:#fef3e0; color:#c07820;
+            font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px;
         }
 
-        .container{
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(12px);
-            border:1px solid #e9d5ff;
-            border-radius:30px;
-            box-shadow:
-            0 15px 40px rgba(139,92,246,.12);
-            padding:30px;
-            background:white;
-            border-radius:30px;
-            box-shadow:
-            0 10px 30px rgba(0,0,0,.08);
-            max-width:1400px;
-            margin:40px auto;
+        .add-goal-form {
+            display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap;
+            background:var(--white); border-radius:var(--radius); padding:16px 20px; box-shadow:var(--shadow);
         }
-
-        button{
-             background:#88a85d;
-            color:white;
-
-            border:none;
-            border-radius:12px;
-
-            padding:10px 18px;
-
-            font-weight:600;
-
-            cursor:pointer;
-
-            transition:0.2s;;
+        .add-goal-form select, .add-goal-form input {
+            padding:9px 14px; border:1.5px solid var(--sand); border-radius:var(--radius-sm);
+            font-size:13px; color:var(--brown); background:var(--cream); font-family:inherit; outline:none;
         }
-        
-        button:hover{
-            transform:translateY(-2px);
-            background:#799952;
-        }   
+        .add-goal-form input:focus, .add-goal-form select:focus { border-color:var(--green-lt); background:var(--white); }
+        .add-goal-form input[name="title"] { flex:1; min-width:160px; }
+        .add-goal-form input[name="target"] { width:90px; }
+        .add-goal-form select { font-size:16px; cursor:pointer; }
 
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
+        /* ── PROGRESS CHART ── */
+        .progress-section { margin-top:32px; }
+        .chart-card {
+            background:var(--white); border-radius:var(--radius);
+            padding:24px 28px; box-shadow:var(--shadow);
         }
-
-        .task-pokemon{
-            position:absolute;
-            right:15px;
-            bottom:15px;
-
-            width:55px;
-            height:55px;
-
-            object-fit:contain;
+        .chart-area {
+            display:flex; align-items:flex-end; justify-content:space-between;
+            gap:14px; height:200px; padding-top:10px;
         }
-
-        .task-card:hover {
-            transform:translateY(-4px);
+        .chart-col {
+            flex:1; display:flex; flex-direction:column; align-items:center;
+            gap:8px; height:100%; justify-content:flex-end;
         }
-
-        h1{
-            color:#6b4f3a;
-            text-shadow:
-            0 0 10px rgba(192,132,252,.25);
+        .chart-bar-wrap {
+            width:100%; max-width:48px; flex:1;
+            display:flex; align-items:flex-end; justify-content:center;
         }
-
-        h2 {
-            text-align: center;
+        .chart-bar {
+            width:100%; border-radius:8px 8px 4px 4px;
+            background:linear-gradient(180deg, var(--green-lt), var(--green));
+            min-height:4px; transition:height .6s ease, opacity .2s;
+            position:relative; cursor:pointer;
         }
-
-        .trainer-card{
-            background:#fffaf2;
-            border:1px solid #eadcff;
-            border-radius:24px;
-            padding:20px;
-            min-height: 260px;
+        .chart-bar.today { background:linear-gradient(180deg, #e8c468, #d4920a); }
+        .chart-bar:hover { opacity:.85; }
+        .chart-bar .bar-val {
+            position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+            font-size:12px; font-weight:700; color:var(--brown);
         }
+        .chart-day-label { font-size:12px; color:var(--brown-lt); font-weight:600; }
+        .chart-day-label.today { color:var(--green); font-weight:700; }
+        .chart-empty { text-align:center; padding:40px 0; color:var(--brown-lt); font-size:14px; }
 
-        .trainer-card p{
-            margin: 8px 0;
+        /* ── HABIT TRACKER ── */
+        .habit-section { margin-top:32px; }
+        .habit-table-wrap {
+            background:var(--white);
+            border-radius:var(--radius);
+            padding:24px;
+            box-shadow:var(--shadow);
+            overflow-x:auto;
         }
-
-        .xp-bar{
-            width:100%;
-            height:14px;
-            background:#ddd2f2;
-            border-radius:999px;
-            overflow:hidden;
+        table.habit-table { width:100%; border-collapse:collapse; }
+        .habit-table th {
+            font-size:12px; font-weight:600; color:var(--brown-lt);
+            padding:8px 12px; text-align:center;
         }
+        .habit-table th.habit-name-col { text-align:left; min-width:160px; }
+        .habit-table th.today-col { color:var(--green); }
 
-        .xp-fill{
-            width:40%;
-            height:100%;
-            background:#88a85d;
+        .habit-table td { padding:8px 12px; text-align:center; vertical-align:middle; }
+        .habit-table td.habit-name-cell {
+            text-align:left; font-size:13px; font-weight:600; color:var(--brown);
+            display:flex; align-items:center; gap:8px;
         }
+        .habit-table tr { border-bottom:1px solid var(--cream2); }
+        .habit-table tr:last-child { border-bottom:none; }
 
-        .calendar-card{
-            min-width:420px;
-        }
-
-        .calendar-card h3{
-            text-align:center;
-            color:#7b5cff;
-            margin-bottom:15px;
-        }
-
-        .calendar-table{
-            width:100%;
-            border-collapse:collapse;
-            table-layout:fixed;
-        }
-
-        .calendar-table th{
-            color:#7b5cff;
-            padding:10px;
-        }
-
-        .calendar-table td{
-            width:40px;
-            height:40px;
-            text-align:center;
-            vertical-align:middle;
+        /* toggle button = the check cell */
+        .habit-check-form { margin:0; }
+        .habit-check-btn {
+            width:32px; height:32px;
             border-radius:50%;
-            transition:0.2s;
-            font-size:18px;
-            font-weight:500;
+            border:2px solid var(--sand);
+            background:var(--cream);
             cursor:pointer;
-            padding:10px;
+            font-size:15px;
+            display:flex; align-items:center; justify-content:center;
+            transition:all .15s;
+            margin:0 auto;
+        }
+        .habit-check-btn:hover { border-color:var(--green-lt); background:var(--green-bg); }
+        .habit-check-btn.done {
+            background:var(--green);
+            border-color:var(--green);
+            color:#fff;
+        }
+        .habit-check-btn.today-btn { border-color:var(--green-lt); }
+
+        .habit-delete-btn {
+            background:none; border:none; cursor:pointer;
+            color:#ccc; font-size:14px; padding:4px 8px;
+            border-radius:6px; transition:color .15s, background .15s;
+        }
+        .habit-delete-btn:hover { color:#e05b5b; background:#fdeaea; }
+
+        /* Add habit form inline */
+        .add-habit-form {
+            display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap;
+        }
+        .add-habit-form input[type="text"] {
+            flex:1; min-width:160px;
+            padding:9px 14px; border:1.5px solid var(--sand); border-radius:var(--radius-sm);
+            font-size:13px; color:var(--brown); background:var(--cream);
+            font-family:inherit; outline:none; transition:border-color .15s;
+        }
+        .add-habit-form input:focus { border-color:var(--green-lt); background:var(--white); }
+        .emoji-select {
+            padding:9px 10px; border:1.5px solid var(--sand); border-radius:var(--radius-sm);
+            font-size:16px; background:var(--cream); cursor:pointer; outline:none;
         }
 
-        .calendar-table td:hover{
-            background:#ffdfef;
-            transform:scale(1.05);
-            border-radius:50%;
+        .streak-row { display:flex; gap:4px; margin-top:2px; }
+        .streak-dot { width:8px; height:8px; border-radius:50%; background:var(--sand); }
+        .streak-dot.done { background:var(--green); }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeInUp {
+            from { opacity:0; transform:translateY(16px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .trainer-card, .stat-tile, .cal-card, .today-banner,
+        .task-card, .goal-card, .schedule-card, .chart-card,
+        .habit-table-wrap, .add-goal-form {
+            animation: fadeInUp .5s ease both;
+        }
+        /* лёгкая каскадная задержка для карточек задач/целей */
+        .tasks-grid > *:nth-child(1), .goals-grid > *:nth-child(1) { animation-delay:.02s; }
+        .tasks-grid > *:nth-child(2), .goals-grid > *:nth-child(2) { animation-delay:.06s; }
+        .tasks-grid > *:nth-child(3), .goals-grid > *:nth-child(3) { animation-delay:.10s; }
+        .tasks-grid > *:nth-child(4), .goals-grid > *:nth-child(4) { animation-delay:.14s; }
+        .tasks-grid > *:nth-child(5), .goals-grid > *:nth-child(5) { animation-delay:.18s; }
+        .tasks-grid > *:nth-child(6), .goals-grid > *:nth-child(6) { animation-delay:.22s; }
+
+        /* Уважение к настройке "уменьшить движение" */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation:none !important; transition:none !important; }
         }
 
-        .top-section{
-            display:grid;
-            grid-template-columns:
-                360px
-                140px
-                1fr;
+        /* Улучшенные hover на статах и календаре */
+        .stat-tile { transition:transform .2s, box-shadow .2s; }
+        .stat-tile:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
 
-            gap:25px;
-            align-items:start;
+        /* ── MOBILE / RESPONSIVE ── */
+        /* бургер-кнопка (видна только на мобильном) */
+        .menu-toggle {
+            display:none; position:fixed; top:16px; left:16px; z-index:1100;
+            width:44px; height:44px; border-radius:12px; border:none; cursor:pointer;
+            background:var(--green); color:#fff; font-size:20px; box-shadow:var(--shadow);
+            align-items:center; justify-content:center;
         }
-        
-        .task-card{
-            background:#fffdf8;
-            border-radius:20px;
-            padding:20px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            transition:0.3s;
-            border-left: 4px solid #88a85d;
-            position:relative;
-            display:flex;
-            flex-direction:column;
-            gap:10px;
-            min-height:150px;
+        .sidebar-overlay {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,.35);
+            z-index:1000; opacity:0; transition:opacity .25s;
+        }
+        .sidebar-overlay.open { display:block; opacity:1; }
+
+        @media (max-width: 1100px) {
+            .top-row { grid-template-columns:1fr 1fr; }
+            .cal-card { grid-column:1/-1; }
+        }
+
+        @media (max-width: 860px) {
+            .menu-toggle { display:flex; }
+            .sidebar {
+                position:fixed; top:0; left:0; height:100%;
+                transform:translateX(-100%); transition:transform .28s ease; z-index:1050;
             }
-
-        .calendar-table th:nth-child(6),
-        .calendar-table td:nth-child(6){
-            color:#7aa7ff;
+            .sidebar.open { transform:translateX(0); }
+            .main { padding:72px 16px 32px; }
+            .top-row { grid-template-columns:1fr; }
+            .stats-grid { grid-template-columns:repeat(3,1fr); }
+            .today-banner { flex-direction:column; align-items:flex-start; gap:16px; }
+            .banner-btn { margin-left:0; width:100%; }
+            .section-header { flex-direction:column; align-items:flex-start; }
+            .filter-bar { width:100%; }
+            .chart-area { height:160px; }
         }
 
-        .calendar-table th:nth-child(7),
-        .calendar-table td:nth-child(7){
-            color:#ff7eb6;
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns:repeat(2,1fr); }
+            .header h1 { font-size:20px; }
+            .tasks-grid, .goals-grid { grid-template-columns:1fr; }
         }
-        
-        .today{
-            background:hsl(250, 100%, 91%) !important;
-            color:white !important;
-            font-weight:bold;
-            border-radius:50%;
-        }
-
-        .tasks-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-            gap:20px;
-            margin-top:20px;
-        }
-
-        .welcome-banner{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-
-            margin:25px 0;
-
-            padding:25px 35px;
-
-            background:linear-gradient(
-                135deg,
-                #fff8e8,
-                #f4f1dc
-            );
-
-            border-radius:25px;
-            border-left:6px solid #88a85d;
-            box-shadow:0 8px 20px rgba(0,0,0,0.08);
-            
-        }
-
-        .welcome-text h2{
-            margin:0;
-            color:#5b4b36;
-        }
-
-        .welcome-text p{
-            margin-top:8px;
-            color:#8b7a63;
-        }
-
-        .welcome-pokemon{
-            font-size:40px;
-        }
-
-        .stats-column{
-            display:flex;
-            flex-direction:column;
-            gap:18px;
-        }
-
-        .stat-card{
-            background:white;
-            border-radius:20px;
-            padding:20px;
-            text-align:center;
-            box-shadow:0 6px 18px rgba(0,0,0,.05);
-            width: 120px;
-            height: 120px;
-        }
-
-        .stat-card h3{
-            font-size:25px;
-            margin:0;
-        }
-
-        .stat-card h2{
-            font-size: 15px;
-            margin: 20px 0;
-        }
-
-        .stat-card p{
-            font-size: 14px;
-            color:#7d7767;
-        }
-
-        .subtitle{
-            color:#8b7a63;
-            margin-top:-10px;
-            margin-bottom:20px;
-        }
-
-        .avatar{
-            width:60px;
-            height:60px;
-            border-radius:50%;
-            background:#f7f2dd;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:30px;
-        }
-
-        .logo-icon{
-            width:40px;
-            height:40px;
-            vertical-align:middle;
-            margin-right:10px;
-        }
-
-        .stat-icon{
-            width:32px;
-            height:32px;
-            margin-bottom:10px;
-        }
-
-        .status{
-            padding:6px 12px;
-            border-radius:999px;
-            font-size:13px;
-            font-weight:600;
-        }
-
-        .completed{
-            background:#dff4e1;
-            color:#2f7d4a;
-        }
-
-        .pending{
-            background:#fff1d6;
-            color:#c68a15;
-        }
-
-        .mini-icon{
-            width:18px;
-            height:18px;
-
-            vertical-align:middle;
-            margin-right:6px;
-        }
-
-        .task-pokemon{
-            width:50px;
-            height:50px;
-            position:absolute;
-            top:15px;
-            right:15px;
-        }
-
-        .sidebar{
-
-            width:260px;
-            min-height:100vh;
-
-            background:white;
-
-            padding:30px 20px;
-
-            box-shadow:0 0 20px rgba(0,0,0,0.05);
-
-            display:flex;
-            flex-direction:column;
-        }
-
-        .sidebar-logo{
-
-            display:flex;
-            align-items:center;
-
-            gap:15px;
-
-            margin-bottom:40px;
-        }
-
-        .sidebar-logo img{
-
-            width:45px;
-            height:45px;
-        }
-
-        .sidebar-logo h2{
-
-            margin:0;
-
-            color:#5b4b36;
-        }
-
-        .sidebar nav{
-            display:flex;
-            flex-direction:column;
-            gap:12px;
-        }
-
-        .sidebar nav a{
-
-            text-decoration:none;
-
-            color:#5b4b36;
-
-            display:flex;
-
-            align-items:center;
-
-            gap:12px;
-
-            padding:14px;
-
-            border-radius:14px;
-
-            transition:0.2s;
-        }
-        .active-menu{
-
-            background:#88a85d;
-
-            color:white !important;
-        }
-        .sidebar nav img{
-            width:22px;
-            height:22px;
-        }
-
-        .sidebar-pokemon{
-
-            margin-top:auto;
-            text-align:center;
-        }
-
-        .sidebar-pokemon img{
-            width:160px;
-        }
-
-        .main-content{
-            flex:1;
-        }
-
-        .motivation-card{
-            margin-top: auto;
-            background: linear-gradient(
-                180deg,
-                #fffdf8 0%,
-                #f8f3e8 100%
-            );
-            border: 1px solid #eadcff;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-        }
-
-        .motivation-card p{
-            font-weight: 600;
-            color: #6f513d;
-            margin-bottom: 15px;
-        }
-
-        .sidebar-pokemon img{
-            width: 250px;
-            height: auto;
-        }
-
     </style>
 </head>
-
 <body>
 
-    <div class="sidebar">
+<!-- Mobile menu button -->
+<button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-        <div class="sidebar-logo">
-            <img src="/static/icons/ball.png">
-            <div>
-                <h2>Poké Planner</h2>
-            </div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <img src="/static/icons/ball.png" alt="">
+        <div><span>Poké Planner</span><small>🌿 TRAINER HUB</small></div>
+    </div>
+    <nav>
+        <a href="/dashboard?user_id={{ user_id }}" class="active"><img src="/static/icons/icons8-dashboard-48.png"> Dashboard</a>
+        <a href="/add-task?user_id={{ user_id }}"><img src="/static/icons/icons8-tasks-64.png"> Tasks</a>
+        <a href="#"><img src="/static/icons/check-mark.png"> Calendar</a>
+        <a href="#"><img src="/static/icons/icons8-progress-64.png"> Progress</a>
+        <a href="/settings?user_id={{ user_id }}"><img src="/static/icons/settings.png"> Settings</a>
+        <a href="/logout"><img src="/static/icons/icons8-tasks-64.png"> Log out</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="motivation">
+            <img src="/static/icons/pngwing.com (2).png" alt="">
+            <span>Keep going, Trainer! 🌿<br><small style="font-weight:400;color:#a09080">Small steps every day<br>lead to big victories.</small></span>
+            <img src="/static/icons/Halloween-Bulbasaur-Transparent-Background.png" alt="">
         </div>
+    </div>
+</div>
 
-        <nav>
-
-            <a href="#" class="active-menu">
-                <img src="/static/icons/icons8-dashboard-48.png">
-                Dashboard
-            </a>
-
-            <a href="#">
-                <img src="/static/icons/icons8-tasks-64.png">
-                Tasks
-            </a>
-
-            <a href="#">
-                <img src="/static/icons/check-mark.png">
-                Calendar
-            </a>
-
-            <a href="#">
-                <img src="/static/icons/icons8-progress-64.png">
-                Progress
-            </a>
-
-            <a href="#">
-                <img src="/static/icons/settings.png">
-                Settings
-            </a>
-
-            
-
-        </nav>
-
-        <div class="motivation-card">
-
-            <div class="sidebar-pokemon">
-                <img src="/static/icons/pngwing.com (2).png">
-            </div>
-            <p>Keep going, Trainer!
-                <img src="/static/icons/leaf1.png" class="stat-icon">
-            </p>
-
-            <div class="sidebar-pokemon">
-                <img src="/static/icons/Halloween-Bulbasaur-Transparent-Background.png">
-            </div>
+<div class="main">
+    <div class="header">
+        <div>
+            <h1>Good morning, {{ name }}! ☀️</h1>
+            <div class="header-sub">Today is a great day to be productive! 🌿</div>
         </div>
-
     </div>
 
-    <div class="main-content">
-    <div class="container">
-
-        <h1> Weekly Planner</h1>
-        <p class="subtitle">
-            Train. Complete. Level Up.
-        </p>
-
-        <div class="welcome-banner">
-
-            <div class="welcome-text">
-                <h2>Welcome back, {{ name }} </h2>
-                <p>{{ rank }} • Level {{ level }}<img src="/static/icons/star.png" class="stat-icon"></p>
-            </div>
-
-
-        </div>
-
-    <div class="top-section">
-                
+    <!-- TOP ROW -->
+    <div class="top-row">
         <div class="trainer-card">
-
-            <img src="/static/icons/avatar.png" class="avatar">
-
-            <h3>{{ name }}</h3>
-
-            <p>
-                <img src="/static/icons/icons8-award-96.png" class="stat-icon">
-                {{ rank }}
-            </p>
-
-            <p>
-                <img src="/static/icons/star.png" class="stat-icon">
-                Level {{ level }}
-            </p>
-
-            <p>
-                <img src="/static/icons/lightning.png" class="stat-icon">
-                {{ xp }}/100 XP
-            </p>
-
-            <div class="xp-bar">
-                <div class="xp-fill"></div>
-            </div>
-
-        </div>
-        <div class="stats-column">
-
-            <div class="stat-card">
-                <img src="/static/icons/lightning.png" class="stat-icon">
-                <h3>{{ xp }}/100</h3>
-                <p>XP</p>
-            </div>
-
-            <div class="today-plan">
-                <img src="/static/icons/pikachu-chef.png">
-
-                <div class="plan-content">
-                    <h2>Today's Plan</h2>
-                    <p>Complete your weekly goals.</p>
-
-                    <button>View Tasks</button>
+            <div class="trainer-top">
+                <div class="avatar-wrap"><img src="/static/icons/avatar.webp" alt="avatar"></div>
+                <div>
+                    <div class="trainer-name">{{ name }}</div>
+                    <div class="trainer-badge"><img src="/static/icons/icons8-award-96.png"> {{ rank }}</div>
                 </div>
             </div>
-
-            <div class="stat-card">
-                <img src="/static/icons/clipboard.png" class="stat-icon">
-                <h3>{{ tasks|length }}</h3>
-                <p>Tasks</p>
+            <div class="trainer-stats">
+                <span><img src="/static/icons/star.png"> Level {{ level }}</span>
+                <span><img src="/static/icons/lightning.png"> {{ xp }} / 100 XP</span>
             </div>
-
-            <div class="stat-card">
-                <img src="/static/icons/icons8-award-96.png" class="stat-icon">
-                <h3>{{ level }}</h3>
-                <p>Level</p>
+            <div class="xp-bar-wrap">
+                <div class="xp-label"><span>XP Progress</span><span>{{ xp }}%</span></div>
+                <div class="xp-track"><div class="xp-fill" style="width:{{ xp }}%"></div></div>
             </div>
-
         </div>
 
-        <div class="calendar-card">
-            <h3>{{ month_name }} {{ year }}</h3>
-            <p class="today-text">
-                Today: {{ current_day }}
-            </p>
-            <table class="calendar-table">
-                <tr>
-                    <th>Mo</th>
-                    <th>Tu</th>
-                    <th>We</th>
-                    <th>Th</th>
-                    <th>Fr</th>
-                    <th>Sa</th>
-                    <th>Su</th>
-                </tr>
+        <div class="stats-grid">
+            <div class="stat-tile"><div class="icon">⚡</div><div class="val">+{{ xp }}</div><div class="lbl">XP Today</div></div>
+            <div class="stat-tile"><div class="icon">📋</div><div class="val">{{ tasks|length }}</div><div class="lbl">Tasks</div></div>
+            <div class="stat-tile"><div class="icon">🔥</div><div class="val">5</div><div class="lbl">Streak</div></div>
+            <div class="stat-tile">
+                <div class="icon">✅</div>
+                <div class="val">{% set done=namespace(c=0) %}{% for t in tasks %}{% if t[2]=='Completed' %}{% set done.c=done.c+1 %}{% endif %}{% endfor %}{{ done.c }}</div>
+                <div class="lbl">Done</div>
+            </div>
+            <div class="stat-tile"><div class="icon">🏆</div><div class="val">{{ level }}</div><div class="lbl">Level</div></div>
+            <div class="stat-tile">
+                <div class="icon">🌿</div>
+                <div class="val">{{ habits|length }}</div>
+                <div class="lbl">Habits</div>
+            </div>
+        </div>
 
+        <div class="cal-card">
+            <div class="cal-header">
+                <span class="cal-title">{{ month_name }} {{ year }}</span>
+                <span class="cal-today-badge">{{ current_day }}</span>
+            </div>
+            <table class="cal-table">
+                <tr><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th></tr>
                 {% for week in calendar %}
                 <tr>
                     {% for day in week %}
-                        {% if day == 0 %}
-                            <td></td>
-
-                        {% elif day == current_day %}
-                            <td class="today">{{ day }}</td>
-
-                        {% else %}
-                            <td>{{ day }}</td>
-
+                        {% if day == 0 %}<td></td>
+                        {% elif day == current_day %}<td class="today">{{ day }}</td>
+                        {% else %}<td>{{ day }}</td>
                         {% endif %}
                     {% endfor %}
                 </tr>
                 {% endfor %}
             </table>
-            
         </div>
     </div>
-        <h2>Your Tasks</h2>
 
-    <div class="tasks-grid">
+    <!-- BANNER -->
+    <div class="today-banner">
+        <div style="font-size:36px">🌿</div>
+        <div class="banner-text">
+            <h2>Today's Plan</h2>
+            <p>Focus on one quest at a time.<br>Small progress every day brings big results.</p>
+        </div>
+        <button class="banner-btn" onclick="document.querySelector('.tasks-grid').scrollIntoView({behavior:'smooth'})">View Today's Tasks</button>
+    </div>
 
+    <!-- TASKS -->
+    <div class="section-header">
+        <h2>My Tasks</h2>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div class="filter-bar">
+                <button class="filter-tab active" onclick="filterTasks('all',this)">All</button>
+                <button class="filter-tab" onclick="filterTasks('status:pending',this)">To Do</button>
+                <button class="filter-tab" onclick="filterTasks('status:completed',this)">Completed</button>
+                <button class="filter-tab prio-high" onclick="filterTasks('prio:High',this)">🔴 High</button>
+                <button class="filter-tab prio-medium" onclick="filterTasks('prio:Medium',this)">🟡 Medium</button>
+                <button class="filter-tab" onclick="filterTasks('prio:Low',this)">🟢 Low</button>
+            </div>
+            <a href="/add-task?user_id={{ user_id }}" class="add-btn">+ Add Task</a>
+        </div>
+    </div>
+
+    <div class="tasks-grid" id="tasksGrid">
     {% if tasks %}
+        {% for task in tasks %}
+        <div class="task-card {% if task[2]=='Completed' %}completed{% endif %}"
+             data-status="{{ task[2]|lower }}" data-priority="{{ task[3] if task[3] else 'Medium' }}">
+            {% if loop.index==1 %}<img src="/static/icons/bullbasaur.png" class="task-poke">
+            {% elif loop.index==2 %}<img src="/static/icons/charmander.png" class="task-poke">
+            {% elif loop.index==3 %}<img src="/static/icons/dratini.png" class="task-poke">
+            {% elif loop.index==4 %}<img src="/static/icons/gengar.png" class="task-poke">
+            {% elif loop.index==5 %}<img src="/static/icons/pikachu.png" class="task-poke">
+            {% elif loop.index==6 %}<img src="/static/icons/squirtle.png" class="task-poke">
+            {% elif loop.index==7 %}<img src="/static/icons/snorlax.png" class="task-poke">
+            {% elif loop.index==8 %}<img src="/static/icons/rattata.png" class="task-poke">
+            {% elif loop.index==9 %}<img src="/static/icons/poke.png" class="task-poke">
+            {% elif loop.index==10 %}<img src="/static/icons/psyduck.png" class="task-poke">
+            {% else %}<img src="/static/icons/jigglypuff.png" class="task-poke">{% endif %}
 
-    {% for task in tasks %}
-
-    <div class="task-card">
-                {% if loop.index == 1 %}
-        <img src="/static/icons/bullbasaur.png" class="task-pokemon">
-
-        {% elif loop.index == 2 %}
-        <img src="/static/icons/charmander.png" class="task-pokemon">
-
-        {% elif loop.index == 3 %}
-        <img src="/static/icons/dratini.png" class="task-pokemon">
-
-        {% elif loop.index == 4 %}
-        <img src="/static/icons/gengar.png" class="task-pokemon">
-
-        {% elif loop.index == 5 %}
-        <img src="/static/icons/pikachu.png" class="task-pokemon">
-
-        {% elif loop.index == 6 %}
-        <img src="/static/icons/squirtle.png" class="task-pokemon">
-
-        {% elif loop.index == 7 %}
-        <img src="/static/icons/snorlax.png" class="task-pokemon">
-
-        {% elif loop.index == 8 %}
-        <img src="/static/icons/rattata.png" class="task-pokemon">
-
-        {% elif loop.index == 9 %}
-        <img src="/static/icons/poke.png" class="task-pokemon">
-
-        {% elif loop.index == 10 %}
-        <img src="/static/icons/psyduck.png" class="task-pokemon">
-
-        {% else %}
-        <img src="/static/icons/jigglypuff.png" class="task-pokemon">
-        {% endif %}
-
-        <div class="quest-title">
-        ⚡ {{ task[0] }}
-        <br>
-        📅 {{ task[1] }}
-        <br>
-        {% if task[2] == "Completed" %}
-        <span class="status completed">
-            Completed
-        </span>
-        {% else %}
-        <span class="status pending">
-            Pending
-        </span>
-        {% endif %}
+            <div class="task-title">⚡ {{ task[0] }}</div>
+            <div class="task-meta">
+                <span>📅 {{ task[1] }}</span>
+                {% set p = task[3] if task[3] else 'Medium' %}
+                <span class="priority-badge {{ p|lower }}">{% if p=='High' %}🔴{% elif p=='Medium' %}🟡{% else %}🟢{% endif %} {{ p }}</span>
+                <span class="status-badge {% if task[2]=='Completed' %}completed{% else %}pending{% endif %}">{{ task[2] }}</span>
+            </div>
+            <div class="task-actions">
+                <form action="/edit-task/{{ task[0] }}" method="get">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit" class="btn-sm btn-edit">✏️ Edit</button>
+                </form>
+                <form action="/delete-task" method="post">
+                    <input type="hidden" name="title" value="{{ task[0] }}">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit" class="btn-sm btn-delete">🗑 Delete</button>
+                </form>
+                {% if task[2] != 'Completed' %}
+                <form action="/complete-task" method="post">
+                    <input type="hidden" name="title" value="{{ task[0] }}">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit" class="btn-sm btn-complete">✅ Complete</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
-    <div class="buttons">
-
-        <form action="/edit-task/{{ task[0] }}" method="get">
-             <input type="hidden" name="user_id" value="{{ user_id }}">
-             <button type="submit">Edit</button>
-        </form>
-
-        <form action="/delete-task" method="post">
-            <input type="hidden" name="title" value="{{ task[0] }}">
-            <input type="hidden" name="user_id" value="{{ user_id }}">
-            <button type="submit">Delete</button>
-        </form>
-
-        <form action="/complete-task" method="post">
-
-            <input type="hidden" name="title" value="{{ task[0] }}">
-            <input type="hidden" name="user_id" value="{{ user_id }}">
-
-            <button type="submit">
-                Complete Quest
-            </button>
-
-        </form>
-
-    </div>
-    </div>
-    {% endfor %}
-
+        {% endfor %}
     {% else %}
-
-    <p>No tasks yet.</p>
-
+        <div class="empty-state"><div class="empty-icon">🎒</div><p>No tasks yet, Trainer!<br>Add your first quest below.</p></div>
     {% endif %}
-
-        <a href="/add-task?user_id={{ user_id }}">
-            <button>Add Task</button>
-        </a>
-
-        
     </div>
+
+    <!-- SCHEDULE -->
+    <div class="schedule-section">
+        <div class="section-header">
+            <h2>⏰ Today's Schedule</h2>
+            <span style="font-size:13px;color:var(--brown-lt)">Plan your day by time</span>
+        </div>
+        <div class="schedule-card">
+            {% if schedule %}
+            <div class="schedule-list">
+                {% for ev in schedule %}
+                <div class="schedule-item">
+                    <div class="sched-time">{{ ev.start }}</div>
+                    <div class="sched-divider"></div>
+                    <div class="sched-emoji">{{ ev.emoji }}</div>
+                    <div class="sched-body">
+                        <div class="sched-title">{{ ev.title }}</div>
+                        <div class="sched-range">{{ ev.start }} – {{ ev.end }}</div>
+                    </div>
+                    <form action="/delete-schedule" method="post">
+                        <input type="hidden" name="schedule_id" value="{{ ev.id }}">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <button type="submit" class="sched-del" title="Delete">✕</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="schedule-empty">📅 No events scheduled — add one below!</div>
+            {% endif %}
+
+            <!-- Add event -->
+            <form action="/add-schedule" method="post" class="add-sched-form">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <select name="emoji">
+                    <option>📌</option><option>🍳</option><option>📦</option>
+                    <option>💻</option><option>📚</option><option>🏃</option>
+                    <option>☕</option><option>🍽️</option><option>🧘</option>
+                    <option>📞</option><option>🎯</option><option>😴</option>
+                </select>
+                <input type="text" name="title" placeholder="Event name..." required>
+                <input type="time" name="start_time" required>
+                <input type="time" name="end_time" required>
+                <button type="submit" class="add-btn">+ Add Event</button>
+            </form>
+        </div>
     </div>
+
+    <!-- GOALS -->
+    <div class="goals-section">
+        <div class="section-header">
+            <h2>🎯 Goals</h2>
+            <span style="font-size:13px;color:var(--brown-lt)">Track your bigger dreams</span>
+        </div>
+
+        {% if goals %}
+        <div class="goals-grid">
+            {% for goal in goals %}
+            <div class="goal-card {{ 'done' if goal.pct >= 100 else '' }}">
+                <div class="goal-head">
+                    <div class="goal-emoji">{{ goal.emoji }}</div>
+                    <div class="goal-info">
+                        <div class="goal-title">{{ goal.title }}</div>
+                        <div class="goal-count">{{ goal.current }} / {{ goal.target }}</div>
+                    </div>
+                    <div class="goal-pct">{{ goal.pct }}%</div>
+                </div>
+                <div class="goal-bar-track">
+                    <div class="goal-bar-fill {{ 'done' if goal.pct >= 100 else '' }}" style="width:{{ goal.pct }}%"></div>
+                </div>
+                <div class="goal-actions">
+                    {% if goal.pct >= 100 %}
+                    <span class="goal-done-badge">🏆 Completed!</span>
+                    {% else %}
+                    <form action="/goal-progress" method="post">
+                        <input type="hidden" name="goal_id" value="{{ goal.id }}">
+                        <input type="hidden" name="step" value="-1">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <button type="submit" class="goal-btn goal-minus">−</button>
+                    </form>
+                    <form action="/goal-progress" method="post">
+                        <input type="hidden" name="goal_id" value="{{ goal.id }}">
+                        <input type="hidden" name="step" value="1">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <button type="submit" class="goal-btn goal-plus">+</button>
+                    </form>
+                    {% endif %}
+                    <form action="/delete-goal" method="post" style="margin-left:auto;">
+                        <input type="hidden" name="goal_id" value="{{ goal.id }}">
+                        <input type="hidden" name="user_id" value="{{ user_id }}">
+                        <button type="submit" class="goal-btn goal-del" title="Delete goal">✕</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="chart-card">
+            <div class="chart-empty">🌟 No goals yet — set your first one below!</div>
+        </div>
+        {% endif %}
+
+        <!-- Add goal -->
+        <form action="/add-goal" method="post" class="add-goal-form">
+            <input type="hidden" name="user_id" value="{{ user_id }}">
+            <select name="emoji">
+                <option>🎯</option><option>📚</option><option>💪</option>
+                <option>🏃</option><option>💰</option><option>🎨</option>
+                <option>🎵</option><option>🌍</option><option>⭐</option>
+                <option>🔥</option><option>🧠</option><option>🏆</option>
+            </select>
+            <input type="text" name="title" placeholder="Goal name (e.g. Read 10 books)" required>
+            <input type="number" name="target" placeholder="Target" min="1" value="10" required>
+            <button type="submit" class="add-btn">+ Add Goal</button>
+        </form>
+    </div>
+
+    <!-- PROGRESS THIS WEEK -->
+    <div class="progress-section">
+        <div class="section-header">
+            <h2>📊 Progress This Week</h2>
+            <span style="font-size:13px;color:var(--brown-lt)">Tasks completed per day</span>
+        </div>
+        <div class="chart-card">
+            {% set total_done = week_progress|sum %}
+            {% if total_done > 0 %}
+            <div class="chart-area">
+                {% for i in range(7) %}
+                <div class="chart-col">
+                    <div class="chart-bar-wrap">
+                        <div class="chart-bar {{ 'today' if i == today_col else '' }}"
+                             style="height: {{ (week_progress[i] / max_progress * 100)|round }}%;">
+                            {% if week_progress[i] > 0 %}<span class="bar-val">{{ week_progress[i] }}</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="chart-day-label {{ 'today' if i == today_col else '' }}">{{ day_labels[i] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="chart-empty">
+                🌱 No tasks completed yet this week.<br>Complete a quest to see your progress grow!
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- HABIT TRACKER -->
+    <div class="habit-section">
+        <div class="section-header">
+            <h2>🌿 Habit Tracker</h2>
+            <span style="font-size:13px;color:var(--brown-lt)">This week</span>
+        </div>
+
+        <div class="habit-table-wrap">
+            {% if habits %}
+            <table class="habit-table">
+                <thead>
+                    <tr>
+                        <th class="habit-name-col">Habit</th>
+                        {% for i in range(7) %}
+                        <th class="{{ 'today-col' if i == today_col else '' }}">{{ day_labels[i] }}</th>
+                        {% endfor %}
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for habit in habits %}
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:18px;">{{ habit.emoji }}</span>
+                            <div>
+                                <div style="font-size:13px;font-weight:600;color:var(--brown)">{{ habit.name }}</div>
+                                <div class="streak-row">
+                                    {% for done in habit.logs %}
+                                    <div class="streak-dot {% if done %}done{% endif %}"></div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    {% for i in range(7) %}
+                    <td>
+                        <form class="habit-check-form" action="/toggle-habit" method="post">
+                            <input type="hidden" name="habit_id" value="{{ habit.id }}">
+                            <input type="hidden" name="log_date" value="{{ habit.dates[i] }}">
+                            <input type="hidden" name="user_id" value="{{ user_id }}">
+                            <button type="submit" class="habit-check-btn {{ 'done' if habit.logs[i] else '' }} {{ 'today-btn' if i == today_col else '' }}">
+                                {{ '✓' if habit.logs[i] else '' }}
+                            </button>
+                        </form>
+                    </td>
+                    {% endfor %}
+                    <td>
+                        <form action="/delete-habit" method="post">
+                            <input type="hidden" name="habit_id" value="{{ habit.id }}">
+                            <input type="hidden" name="user_id" value="{{ user_id }}">
+                            <button type="submit" class="habit-delete-btn" title="Delete habit">✕</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="text-align:center;padding:24px 0;color:var(--brown-lt);font-size:14px;">
+                🌱 No habits yet — add your first one below!
+            </p>
+            {% endif %}
+
+            <!-- Add habit -->
+            <form action="/add-habit" method="post" class="add-habit-form">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <select name="emoji" class="emoji-select">
+                    <option>⭐</option><option>💪</option><option>📚</option>
+                    <option>🏃</option><option>💧</option><option>🥗</option>
+                    <option>🧘</option><option>😴</option><option>✍️</option>
+                    <option>🎯</option><option>🎨</option><option>🎵</option>
+                </select>
+                <input type="text" name="name" placeholder="New habit name..." required>
+                <button type="submit" class="add-btn">+ Add Habit</button>
+            </form>
+        </div>
+    </div>
+
+</div><!-- /main -->
+
+<script>
+function filterTasks(filter, btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.task-card').forEach(card => {
+        let show = true;
+        if (filter === 'all') show = true;
+        else if (filter.startsWith('status:')) show = card.dataset.status === filter.split(':')[1];
+        else if (filter.startsWith('prio:'))   show = card.dataset.priority === filter.split(':')[1];
+        card.setAttribute('data-hidden', !show);
+    });
+}
+
+// Мобильное меню
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// Подтверждение перед удалением (задачи, привычки, цели, события)
+document.addEventListener('submit', function(e) {
+    const form = e.target;
+    const action = form.getAttribute('action') || '';
+    const confirmMap = {
+        '/delete-task':     'Delete this task? This cannot be undone.',
+        '/delete-habit':    'Delete this habit? All its progress will be lost.',
+        '/delete-goal':     'Delete this goal?',
+        '/delete-schedule': 'Delete this event?'
+    };
+    if (confirmMap[action]) {
+        if (!confirm(confirmMap[action])) {
+            e.preventDefault();
+        }
+    }
+});
+</script>
 </body>
 </html>

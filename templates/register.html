@@ -1,74 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Регистрация</title>
-
+    <title>Sign Up — Poké Planner</title>
+    <meta charset="UTF-8">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --green:#7a9e4e; --green-lt:#a8c27a; --green-bg:#f0f4e8;
+            --cream:#faf8f2; --cream2:#f5f1e6; --brown:#5b4535;
+            --brown-lt:#8b7a63; --sand:#e8e0cc; --white:#ffffff;
+            --shadow:0 8px 28px rgba(0,0,0,.10); --radius:24px; --radius-sm:14px;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            text-align: center;
-            padding-top: 100px;
+            min-height:100vh; font-family:'Segoe UI',system-ui,sans-serif; color:var(--brown);
+            background:
+                radial-gradient(circle at 15% 20%, rgba(168,194,122,.18), transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(232,196,104,.15), transparent 40%),
+                var(--cream);
+            display:flex; align-items:center; justify-content:center; padding:24px;
         }
+        .auth-card {
+            background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow);
+            max-width:420px; width:100%; padding:42px 40px; position:relative; overflow:hidden;
+        }
+        .auth-card::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:6px;
+            background:linear-gradient(90deg, var(--green-lt), var(--green), #e8c468);
+        }
+        .auth-logo { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px; }
+        .auth-logo img { width:42px; height:42px; }
+        .auth-logo span { font-size:22px; font-weight:800; color:var(--brown); }
 
-        .container {
-            background: white;
-            width: 400px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
+        .auth-poke { display:block; width:110px; margin:6px auto 16px; }
 
-        input {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
+        .auth-title { font-size:22px; font-weight:700; text-align:center; color:var(--brown); margin-bottom:6px; }
+        .auth-sub { font-size:13px; text-align:center; color:var(--brown-lt); margin-bottom:28px; }
 
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:13px; font-weight:600; color:var(--brown); margin-bottom:6px; }
+        .field input {
+            width:100%; padding:12px 14px; border:1.5px solid var(--sand); border-radius:var(--radius-sm);
+            font-size:14px; color:var(--brown); background:var(--cream); font-family:inherit;
+            outline:none; transition:border-color .15s, background .15s;
         }
+        .field input:focus { border-color:var(--green-lt); background:var(--white); }
 
-        button:hover {
-            background: #2980b9;
+        .btn-submit {
+            width:100%; padding:14px; background:var(--green); color:#fff; border:none;
+            border-radius:var(--radius-sm); font-size:15px; font-weight:700; cursor:pointer;
+            box-shadow:0 4px 14px rgba(122,158,78,.35); transition:background .15s, transform .15s; margin-top:6px;
         }
+        .btn-submit:hover { background:#6a8e3e; transform:translateY(-2px); }
 
-        a {
-            display: block;
-            margin-top: 15px;
-            text-decoration: none;
-        }
+        .auth-foot { text-align:center; margin-top:22px; font-size:13px; color:var(--brown-lt); }
+        .auth-foot a { color:var(--green); font-weight:600; text-decoration:none; }
+        .auth-foot a:hover { text-decoration:underline; }
+        .back-link { display:block; text-align:center; margin-top:14px; font-size:12px; color:var(--brown-lt); text-decoration:none; }
+        .back-link:hover { color:var(--brown); }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>Create Account</h1>
+    <div class="auth-card">
+        <div class="auth-logo">
+            <img src="/static/icons/ball.png" alt="">
+            <span>Poké Planner</span>
+        </div>
+        <img src="/static/icons/bullbasaur.png" class="auth-poke" alt="">
+
+        <div class="auth-title">Start your journey! 🌱</div>
+        <div class="auth-sub">Create an account to begin</div>
 
         <form method="post" action="/register">
-        <input type="text" name="name" placeholder="Name">
-
-        <input type="email" name="email" placeholder="Email">
-
-        <input type="password" name="password" placeholder="Password">
-
-        <br><br>
-
-        <button type="submit">
-        Sign Up
-        </button>
+            <div class="field">
+                <label>Name</label>
+                <input type="text" name="name" placeholder="Your trainer name" required>
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="trainer@example.com" required>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit">⚡ Create Account</button>
         </form>
 
-        <a href="/">← Back to Home</a>
+        <div class="auth-foot">
+            Already have an account? <a href="/login">Log in</a>
+        </div>
+        <a href="/" class="back-link">← Back to Home</a>
     </div>
 </body>
 </html>
